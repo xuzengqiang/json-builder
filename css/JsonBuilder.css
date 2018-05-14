@@ -1,0 +1,127 @@
+body,html{
+    width:100%;
+    height:100%;
+}
+*{
+    margin:0px;
+    padding:0px;
+    font-family: "Microsoft Yahei"
+}
+.json-container {
+    width:1200px;
+    margin:0 auto;
+    padding:20px 0px;
+}
+.json-container .tip{
+    height:40px;
+    font-size:14px;
+    border:1px solid rgb(223, 220, 120);
+    line-height:40px;
+    text-align: center;
+    width:600px;
+    margin:0 auto;
+    background:rgb(237, 237, 185);
+}
+.json-container button{
+    padding:10px 20px;
+    border:1px solid rgb(85, 42, 135);
+    background:rgb(85, 42, 135);
+    color:#FFF;
+    outline:none;
+}
+.json-container select{
+    width:100px;
+    border:1px solid #DDD;
+    outline:none;
+    padding:5px 0px;
+}
+.json-container input{
+    padding:3px 5px;
+    outline: none;
+    color:#666;
+    border:1px solid #DDD;
+}
+.json-container textarea{
+    width:600px;
+    height:500px;
+    resize:none;
+    padding:10px;
+    font-size:13px;
+    outline:none;   
+}
+
+.json-container .json-runner{
+    padding:10px 0px;
+}
+.json-container .json-builder{
+    padding:10px 0px;
+}
+.json-container .field-base-info{
+    height:24px;
+    line-height:24px;
+    border-left:3px solid rgb(85, 42, 135);
+    padding-left:10px;
+    margin:5px 0px;
+}
+.json-container .field-info{
+    padding:10px 0px;
+}
+.json-container .field-label{
+    margin-right:10px;
+    font-size:13px;
+}
+.json-container .field-content{
+    margin-left:5px;
+}
+.json-container .field-label .field-name{
+    color:#AAA;
+    font-weight: normal
+}
+.json-container .field-base-info .field-content{
+    margin:0px 5px;
+    background:#e3ddf0;
+    padding:2px 5px;
+    border-radius:3px;
+    color:rgb(122, 83, 184)
+}
+.json-container .field-column-expand,
+.json-container .field-operate-info {
+    padding-left:13px;
+}
+.json-container .field-column-expand input{
+    text-align: center;
+    width:60px;
+}
+.json-container .field-operate-info input{
+    text-align: center;
+    width:60px;
+}
+.json-container .field-operate-info .brackets{
+    width:20px;
+    border-radius:3px;
+    text-align: center;
+    margin-left:-5px;
+}
+.json-container .field-operate-info .placeholder{
+    width:160px;
+    text-align: left;
+}
+.json-container .json-console{
+    border:1px solid #DDD;
+    padding: 0px 10px 20px;
+    max-height:500px;
+    overflow:auto;
+    font-size:14px;
+    color:#888;
+    position: relative;
+}
+.json-console .operate{
+    padding:10px 0px;
+}
+.json-container button.json-copy{
+    border:0 none;
+    color:rgb(85, 42, 135);
+    background:rgb(215, 215, 225);
+    padding:5px 10px;
+    border-radius:12px;
+}

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>JSON构建</title>
+    <link rel="stylesheet" type="text/css" href="css/JsonBuilder.css">
+    <script type="text/javascript" src="js/dom.js"></script>
+    <script type="text/javascript" src="js/field.js"></script>
+    <script type="text/javascript" src="js/filereader.js"></script>
+    <script type="text/javascript" src="js/JsonBuilder.js"></script>
+</head>
+
+<body>
+    <div class="json-container">
+        <!-- <div class="tip">仅支持Chrome浏览器</div> -->
+        <div class="json-input">
+            <div class="json-content">
+                <textarea placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件">
+                    [
+                        {
+                            "propertyName": "orderNumber",
+                            "columnName": "om.order_number",
+                            "columnType": "string",
+                            "label": "下单编码"
+                        },
+                        {
+                            "propertyName": "orderSource",
+                            "columnName": "om.order_source",
+                            "columnType": "enum",
+                            "label": "下单来源",
+                            "lookupCode": "oms_order_source"
+                        },
+                        {
+                            "propertyName": "goodsTime",
+                            "columnName": "om.goods_time",
+                            "columnType": "date",
+                            "label": "货好时间"
+                        },
+                        {
+                            "propertyName": "estimateWaybill",
+                            "columnName": "om.estimate_waybill",
+                            "columnType": "number",
+                            "label": "票数"
+                        }
+                        ]
+
+                </textarea>
+            </div>
+        </div>
+        <div class="json-runner">
+            <button class="analyze-json">解析JSON</button>
+        </div>
+        <div class="fields-content">
+
+        </div>
+        <div class="json-builder">
+            <button class="config-custom-column">配置自定义列</button>
+            <button class="config-custom-search">配置自定义查询</button>
+        </div>
+        <div class="json-builder">
+            <button class="builder-custom-column">生成自定义列JSON</button>
+            <button class="builder-custom-search">生成自定义查询JSON</button>
+            (
+            <button class="json-copy">复制到剪切板</button>
+            )
+        </div>
+        <div class="json-console">
+            <pre>
+            </pre>
+        </div>
+    </div>
+</body>
+<script>
+    (() => {
+        const dataElement = document.querySelector('.json-content textarea')
+        const fieldsContainer = document.querySelector('.fields-content')
+        const consoleTextarea = document.querySelector('.json-console pre')
+
+        let builder = null
+
+        const jsonconfig = method => {
+            if (builder && typeof builder[method] === 'function') {
+                builder[method]()
+            }
+        }
+
+        const jsonbuilder = method => {
+            if (builder && typeof builder[method] === 'function') {
+                let json = builder[method]()
+                consoleTextarea.innerHTML = JSON.stringify(json, null, '\t')
+            }
+        }
+
+        const addClickEvent = (selector, fun) => {
+            let element = document.querySelector(selector)
+            if (element) {
+                element.addEventListener('click', () => {
+                    fun()
+                    return false
+                })
+            }
+        }
+
+        addClickEvent('.analyze-json', () => {
+            try {
+                builder = new JSONBuilder({
+                    json: dataElement.value,
+                    fieldsContainer: fieldsContainer
+                })
+            } catch (e) {
+                alert(e)
+                builder = null
+            }
+        })
+
+        addClickEvent('.config-custom-column', () => jsonconfig('configCustomColumn'))
+        addClickEvent('.config-custom-search', () => jsonconfig('configCustomSearch'))
+        addClickEvent('.builder-custom-column', () => jsonbuilder('builderCustomColumn'))
+        addClickEvent('.builder-custom-search', () => jsonbuilder('builderCustomSearch'))
+    })()
+</script>
+
+</html>
