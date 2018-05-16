@@ -7,18 +7,24 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>JSON构建</title>
     <link rel="stylesheet" type="text/css" href="css/JsonBuilder.css">
-    <script type="text/javascript" src="js/dom.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/gallery/element/element.css">
+    <script type="text/javascript" src="static/gallery/vue/vue.min.js"></script>
+    <script type="text/javascript" src="static/gallery/element/element.js"></script>
+    <script type="text/javascript" src="config/fields.js"></script>
+    <script type="text/javascript" src="static/common/field.js"></script>
+    <!-- <script type="text/javascript" src="js/dom.js"></script>
     <script type="text/javascript" src="js/field.js"></script>
     <script type="text/javascript" src="js/filereader.js"></script>
-    <script type="text/javascript" src="js/JsonBuilder.js"></script>
+    <script type="text/javascript" src="js/JsonBuilder.js"></script> -->
 </head>
 
 <body>
-    <div class="json-container">
-        <!-- <div class="tip">仅支持Chrome浏览器</div> -->
+    <div id="app" class="json-container">
         <div class="json-input">
             <div class="json-content">
-                <textarea placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件">
+                <el-input type="textarea" placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件" v-model="generalFieldsJSONString">
+                </el-input>
+                <!-- <textarea placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件">
                     [
                         {
                             "propertyName": "orderNumber",
@@ -47,20 +53,48 @@
                         }
                         ]
 
-                </textarea>
+                </textarea> -->
             </div>
         </div>
         <div class="json-runner">
-            <button class="analyze-json">解析JSON</button>
+            <el-button type="primary" @click="analyzeJSON">解析JSON</el-button>
+            <!-- <button class="analyze-json">解析JSON</button> -->
         </div>
         <div class="fields-content">
-
+            <el-tabs v-model="currentModule">
+                <el-tab-pane label="自定义列" name="custom-field">
+                    <el-table :data="fields">
+                        <el-table-column type="selection"></el-table-column>
+                        <el-table-column type="index" label="序号"></el-table-column>
+                        <el-table-column prop="label" label="字段名称"></el-table-column>
+                        <el-table-column prop="propertyName" label="属性名称"></el-table-column>
+                        <el-table-column prop="columnName" label="数据库列名"></el-table-column>
+                        <el-table-column prop="columnType" label="数据库类型"></el-table-column>
+                        <el-table-column prop="lookupCode" label="数据字典"></el-table-column>
+                    </el-table>
+                    <el-button @click="configCustomColumn">配置自定义列</el-button>
+                    <el-button @click="builderCustomColumn">生成自定义列JSON</button>
+                </el-tab-pane>
+                <el-tab-pane label="自定义查询字段" name="custom-search">
+                    <el-table :data="fields">
+                        <el-table-column type="selection"></el-table-column>
+                        <el-table-column type="index" label="序号"></el-table-column>
+                        <el-table-column prop="label" label="字段名称"></el-table-column>
+                        <el-table-column prop="propertyName" label="属性名称"></el-table-column>
+                        <el-table-column prop="columnName" label="数据库列名"></el-table-column>
+                        <el-table-column prop="columnType" label="数据库类型"></el-table-column>
+                        <el-table-column prop="lookupCode" label="数据字典"></el-table-column>
+                    </el-table>
+                    <el-button @click="configCustomSearch">配置自定义查询</el-button>
+                    <el-button @click="builderCustomSearch">生成自定义查询JSON</button>
+                </el-tab-pane>
+            </el-tabs>
         </div>
-        <div class="json-builder">
-            <button class="config-custom-column">配置自定义列</button>
-            <button class="config-custom-search">配置自定义查询</button>
-        </div>
-        <div class="json-builder">
+        <!-- <div class="json-builder">
+            <el-button @click="configCustomColumn">配置自定义列</el-button>
+            <el-button @click="configCustomSearch">配置自定义查询</el-button>
+        </div> -->
+        <!-- <div class="json-builder">
             <button class="builder-custom-column">生成自定义列JSON</button>
             <button class="builder-custom-search">生成自定义查询JSON</button>
             (
@@ -70,10 +104,91 @@
         <div class="json-console">
             <pre>
             </pre>
-        </div>
+        </div> -->
     </div>
 </body>
-<script>
+
+<script type="text/x-template" id="field-template">
+    <label>field</label>
+</script>
+
+
+<script type="text/javascript">
+    /**
+     * 支持的列类型
+     * @description
+     * 暂时支持四种： string, date, enum, number
+     */
+    const rcolumnType = /^(string|date|enum|number)$/
+
+    Vue.component('field', {
+        template: '#field-template',
+        data() {
+            return {
+
+            }
+        }
+    })
+
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                name: '1212',
+                generalFieldsJSONString: JSON.stringify(DEFAULT_GENERAL_FIELDS, null, '\t'),
+                fields: [],
+                currentModule: 'custom-field'
+            }
+        },
+        computed: {
+        },
+        methods: {
+            analyzeJSON() {
+                let generalFields
+                try {
+                    generalFields = JSON.parse(this.generalFieldsJSONString)
+                } catch (e) {
+                    this.$alert('对不起,JSON解析失败,请检测', '温馨提示')
+                }
+
+                if (Array.isArray(generalFields)) {
+                    let index = 0
+                    let length = generalFields.length
+                    let validate
+                    let field
+                    for (index = 0; index < length; index++) {
+                        field = generalFields[index]
+                        validate = Field.validator(field)
+                        if (validate.pass) {
+                            this.fields.push({
+                                propertyName: field.propertyName,
+                                columnName: field.columnName,
+                                columnType: field.columnType,
+                                label: field.label,
+                                lookupCode: field.lookupCode || ''
+                            })
+                        } else {
+                            this.$message.error(`第${index + 1}条配置出错:${validate.message}`)
+                        }
+                    }
+                }
+            },
+            configCustomColumn() {
+
+            },
+            configCustomSearch() {
+
+            },
+            builderCustomColumn() {
+
+            },
+            builderCustomSearch() {
+
+            }
+        }
+    });
+
+
     (() => {
         const dataElement = document.querySelector('.json-content textarea')
         const fieldsContainer = document.querySelector('.fields-content')
