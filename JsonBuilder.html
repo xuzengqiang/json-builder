@@ -63,20 +63,33 @@
         <div class="fields-content">
             <el-tabs v-model="currentModule">
                 <el-tab-pane label="自定义列" name="custom-field">
-                    <el-table :data="fields">
+                    <el-table :data="customColumnFields">
                         <el-table-column type="selection"></el-table-column>
                         <el-table-column type="index" label="序号"></el-table-column>
                         <el-table-column prop="label" label="字段名称"></el-table-column>
+                        <el-table-column label="宽度(px)">
+                            <el-input slot-scope="scope" v-model="scope.row.width"></el-input>
+                        </el-table-column>
                         <el-table-column prop="propertyName" label="属性名称"></el-table-column>
                         <el-table-column prop="columnName" label="数据库列名"></el-table-column>
                         <el-table-column prop="columnType" label="数据库类型"></el-table-column>
+                        <el-table-column label="过滤器">
+                            <template slot-scope="scope">
+                                <el-select v-model="scope.row.filter" v-if="scope.row.columnType.toLowerCase() === 'date'">
+                                    <el-option v-for="(item, property) in timeFilters" :key="property" :label="item" :value="property">
+                                    </el-option>
+                                </el-select>
+                                <label v-else>{{scope.row.filter}}</label>
+                            </template>
+                        </el-table-column>
                         <el-table-column prop="lookupCode" label="数据字典"></el-table-column>
                     </el-table>
-                    <el-button @click="configCustomColumn">配置自定义列</el-button>
-                    <el-button @click="builderCustomColumn">生成自定义列JSON</button>
+                    <el-button @click="builderCustomColumn">生成自定义列JSON</el-button>
+                    <el-input type="textarea" placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件" v-model="generalFieldsJSONString">
+                    </el-input>
                 </el-tab-pane>
                 <el-tab-pane label="自定义查询字段" name="custom-search">
-                    <el-table :data="fields">
+                    <el-table :data="fields" @selection-change="selectionChangeHandle">
                         <el-table-column type="selection"></el-table-column>
                         <el-table-column type="index" label="序号"></el-table-column>
                         <el-table-column prop="label" label="字段名称"></el-table-column>
@@ -85,8 +98,22 @@
                         <el-table-column prop="columnType" label="数据库类型"></el-table-column>
                         <el-table-column prop="lookupCode" label="数据字典"></el-table-column>
                     </el-table>
-                    <el-button @click="configCustomSearch">配置自定义查询</el-button>
-                    <el-button @click="builderCustomSearch">生成自定义查询JSON</button>
+
+                    <el-table :data="customSearchFields" v-if="customSearchFields.length">
+                        <el-table-column type="index" label="序号"></el-table-column>
+                        <el-table-column prop="label" label="字段名称"></el-table-column>
+                        <el-table-column prop="frontBrackets" label="前括号"></el-table-column>
+                        <el-table-column prop="postBrackets" label="后括号"></el-table-column>
+                        <el-table-column label="条件关系">
+                            <el-select slot-scope="scope" v-model="scope.row.conditionOperation">
+                                <el-option v-for="(item, property) in conditionOperations" :key="property" :label="item" :value="property">
+                                </el-option>
+                            </el-select>
+                        </el-table-column>
+                    </el-table>
+                    <el-button @click="builderCustomSearch">生成自定义查询JSON</el-button>
+                    <el-input type="textarea" placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件" v-model="generalFieldsJSONString">
+                    </el-input>
                 </el-tab-pane>
             </el-tabs>
         </div>
@@ -136,8 +163,20 @@
             return {
                 name: '1212',
                 generalFieldsJSONString: JSON.stringify(DEFAULT_GENERAL_FIELDS, null, '\t'),
+                customColumnFields: [],
                 fields: [],
-                currentModule: 'custom-field'
+                customSearchFields: [],
+                currentModule: 'custom-field',
+                timeFilters: {
+                    date: 'date',
+                    minute: 'minute',
+                    time: 'time',
+                    second: 'second'
+                },
+                conditionOperations: {
+                    and: '且',
+                    or: '或'
+                }
             }
         },
         computed: {
@@ -156,22 +195,50 @@
                     let length = generalFields.length
                     let validate
                     let field
+                    let base
                     for (index = 0; index < length; index++) {
                         field = generalFields[index]
                         validate = Field.validator(field)
                         if (validate.pass) {
-                            this.fields.push({
+                            base = {
                                 propertyName: field.propertyName,
                                 columnName: field.columnName,
                                 columnType: field.columnType,
                                 label: field.label,
                                 lookupCode: field.lookupCode || ''
-                            })
+                            }
+
+                            let filter = field.lookupCode ? 'lookup' : field.columnType == 'date' ? 'time' : ''
+
+                            this.customColumnFields.push(Object.assign({}, base, {
+                                width: '100',
+                                filter: filter
+                            }))
+
+                            this.fields.push(Object.assign({}, base))
                         } else {
                             this.$message.error(`第${index + 1}条配置出错:${validate.message}`)
                         }
                     }
                 }
+            },
+            selectionChangeHandle(selection) {
+                let customSearchFields = []
+                selection.forEach(row => {
+                    customSearchFields.push({
+                        propertyName: row.propertyName,
+                        columnName: row.columnName,
+                        columnType: row.columnType,
+                        label: row.label,
+                        frontBrackets: '(',
+                        postBrackets: ')',
+                        conditionOperation: '且',
+                        operation: '包含',
+                        type: 'text',
+                        show: true
+                    })
+                })
+                this.customSearchFields = customSearchFields
             },
             configCustomColumn() {
 

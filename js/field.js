@@ -1,8 +1,7 @@
 /**
  * field
  */
-(window => {
-
+;(window => {
     /**
      * 支持的列类型
      * @description
@@ -12,9 +11,9 @@
 
     /**
      * 过滤掉字符串的前后空格
-     * @param {String} string - 字符串 
+     * @param {String} string - 字符串
      */
-    const trim = string => string ? (string + '').trim() : ''
+    const trim = string => (string ? (string + '').trim() : '')
 
     /**
      * 列默认宽度
@@ -24,12 +23,7 @@
     /**
      * 字段必备属性
      */
-    const FieldPropertys = [
-        'propertyName',
-        'columnType',
-        'columnName',
-        'label'
-    ]
+    const FieldPropertys = ['propertyName', 'columnType', 'columnName', 'label']
 
     /**
      * 条件操作符
@@ -103,17 +97,15 @@
     }
 
     /**
-     * 
+     *
      */
-    const FieldTypeMap = {
-
-    }
+    const FieldTypeMap = {}
 
     class Field {
         /**
          * 构造函数
-         * @param {Object} field 字段信息 
-         * @param {Number} index 当前索引 
+         * @param {Object} field 字段信息
+         * @param {Number} index 当前索引
          */
         constructor(field, index) {
             this.field = field
@@ -124,19 +116,17 @@
         /**
          * 初始化
          */
-        _initialize () {
+        _initialize() {
             const field = this.field
-            FieldPropertys.forEach(property => this[property] = this.getPropertyValue(property))
+            FieldPropertys.forEach(property => (this[property] = this.getPropertyValue(property)))
         }
 
         /**
          * 获取字段值
          * @param {String} property 属性名称
          */
-        getPropertyValue (property) {
-            return this.field && property ?
-                trim(this.field[property]) :
-                null
+        getPropertyValue(property) {
+            return this.field && property ? trim(this.field[property]) : null
         }
 
         /**
@@ -145,7 +135,7 @@
          * 1 必须包含propertyName,columnName,colummType,label属性字段
          * 2 如果columnType是enum,则必须包含lookupCode属性
          */
-        validate () {
+        validate() {
             let validate = true
             const errorOutput = message => {
                 console.error(`第${this.index}条字段验证出错:${message}`)
@@ -181,7 +171,7 @@
          * 构建表单元素
          * @param {HTMLElement} container - 构建的表单元素追加的容器
          */
-        createElement (container) {
+        createElement(container) {
             if (!container instanceof HTMLElement) {
                 container = document.body
             }
@@ -202,7 +192,7 @@
         /**
          * 创建基础信息元素
          */
-        _createBaseElement () {
+        _createBaseElement() {
             let element = document.createElement('div')
             element.className = 'field-base-info'
 
@@ -222,10 +212,9 @@
         /**
          * 创建操作信息
          */
-        _createSearchElement () {
+        _createSearchElement() {
             const element = document.createElement('div')
-            const appendChild = (fieldName, childNode) =>
-                element.appendChild(this.createFieldElement(fieldName, childNode))
+            const appendChild = (fieldName, childNode) => element.appendChild(this.createFieldElement(fieldName, childNode))
 
             element.className = 'field-operate-info'
 
@@ -247,10 +236,13 @@
             this.fieldTypeElement = dom.createInput(FormFieldType[this.columnType])
             appendChild('表单类型', this.fieldTypeElement)
 
-            this.showElement = dom.createSelect({
-                true: '是',
-                false: '否'
-            }, 'false')
+            this.showElement = dom.createSelect(
+                {
+                    true: '是',
+                    false: '否'
+                },
+                'false'
+            )
             appendChild('是否显示', this.showElement)
 
             this.placeholderElement = dom.createInput(`请填写${this.label}`, 'placeholder')
@@ -267,7 +259,7 @@
         /**
          * 获取支持的compare
          */
-        getCompareMap () {
+        getCompareMap() {
             let compareMap = {}
             CompareMap[this.columnType.toLowerCase()].forEach(operate => {
                 compareMap[operate] = GenericQueryOperation[operate]
@@ -278,17 +270,19 @@
         /**
          * 创建表格列需要的元素信息
          */
-        _createColumnElement () {
+        _createColumnElement() {
             const element = document.createElement('div')
-            const appendChild = (fieldName, childNode) =>
-                element.appendChild(this.createFieldElement(fieldName, childNode))
+            const appendChild = (fieldName, childNode) => element.appendChild(this.createFieldElement(fieldName, childNode))
 
             element.className = 'field-column-expand'
 
-            this.columnShowElement = dom.createSelect({
-                true: '是',
-                false: '否'
-            }, 'false')
+            this.columnShowElement = dom.createSelect(
+                {
+                    true: '是',
+                    false: '否'
+                },
+                'false'
+            )
             appendChild('是否显示', this.columnShowElement)
 
             this.columnWidthElement = dom.createInput(DEFAULT_COLUMN_WIDTH)
@@ -308,7 +302,7 @@
          * @param {String} name - 字段名称
          * @param {HTMLElement|String|Array} content - 字段内容
          */
-        createFieldElement (name, content) {
+        createFieldElement(name, content) {
             const element = document.createElement('label')
             element.className = 'field-label'
 
@@ -318,7 +312,7 @@
                 spanElement.innerHTML = `${name}:`
                 element.appendChild(spanElement)
             } else if (name instanceof HTMLElement) {
-                content = name;
+                content = name
                 name = ''
             }
 
@@ -341,7 +335,7 @@
         /**
          * 配置自定义列
          */
-        configCustomColumn () {
+        configCustomColumn() {
             let parentNode = this.searchElement.parentNode
             this.infoElement.appendChild(this.columnElement)
             parentNode && parentNode.removeChild(this.searchElement)
@@ -350,7 +344,7 @@
         /**
          * 配置自定义查询
          */
-        configCustomSearch () {
+        configCustomSearch() {
             let parentNode = this.columnElement.parentNode
             this.infoElement.appendChild(this.searchElement)
             parentNode && parentNode.removeChild(this.columnElement)
@@ -359,15 +353,15 @@
         /**
          * 转化为自定义搜索JSON
          */
-        toSearchJSON () {
+        toSearchJSON() {
             let isShow = this.showElement.value
             if (isShow === 'false') return null
 
             let json = {
                 propertyName: this.propertyName,
                 columnName: this.columnName,
-                frontBracketsElement: this.frontBracketsElement.value,
-                postBracketsElement: this.postBracketsElement.value,
+                frontBrackets: this.frontBracketsElement.value,
+                postBrackets: this.postBracketsElement.value,
                 conditionOperation: this.conditionOperationElement.value,
                 operation: this.operationElement.value,
                 columnType: this.columnType,
@@ -405,7 +399,7 @@
          *      filter: 'time'
          * }
          */
-        toColumnJSON () {
+        toColumnJSON() {
             let json = {
                 key: this.propertyName,
                 label: this.label
@@ -417,9 +411,7 @@
                 Object.assign(json, {
                     filter: {
                         type: 'lookup',
-                        args: [
-                            this.getPropertyValue('lookupCode')
-                        ]
+                        args: [this.getPropertyValue('lookupCode')]
                     }
                 })
             }
