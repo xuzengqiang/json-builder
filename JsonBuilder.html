@@ -102,6 +102,20 @@
                     <el-table :data="customSearchFields" v-if="customSearchFields.length">
                         <el-table-column type="index" label="序号"></el-table-column>
                         <el-table-column prop="label" label="字段名称"></el-table-column>
+                        <el-table-column label="placeholder">
+                            <el-input slot-scope="scope" v-model="scope.row.placeholder"></el-input>
+                        </el-table-column>
+                        <el-table-column label="表单类型">
+                            <template slot-scope="scope">
+                                <label v-if="scope.row.columnType == 'date' || scope.row.columnType == 'enum'">{{scope.row.type}}</label>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="是否禁用">
+                            <el-select slot-scope="scope" v-model="scope.row.disabled">
+                                <el-option v-for="(item, property) in disabled" :key="property" :label="item" :value="property">
+                                </el-option>
+                            </el-select>
+                        </el-table-column>
                         <el-table-column prop="frontBrackets" label="前括号"></el-table-column>
                         <el-table-column prop="postBrackets" label="后括号"></el-table-column>
                         <el-table-column label="条件关系">
@@ -116,15 +130,14 @@
                                 </el-option>
                             </el-select>
                         </el-table-column>
-                        <el-table-column label="placeholder">
-                            <el-input slot-scope="scope" v-model="scope.row.placeholder"></el-input>
-                        </el-table-column>
                         <el-table-column label="过滤器">
-                            <el-select slot-scope="scope" v-model="scope.row.filter" v-if="scope.row.columnType.toLowerCase() === 'date'">
-                                <el-option v-for="(item, property) in timeFilters" :key="property" :label="item" :value="property">
-                                </el-option>
-                            </el-select>
-                            <label v-else>{{scope.row.filter}}</label>
+                            <template slot-scope="scope">
+                                <el-select v-model="scope.row.filter" v-if="scope.row.columnType.toLowerCase() === 'date'">
+                                    <el-option v-for="(item, property) in timeFilters" :key="property" :label="item" :value="property">
+                                    </el-option>
+                                </el-select>
+                                <label v-else>{{scope.row.filter}}</label>
+                            </template>
                         </el-table-column>
                     </el-table>
                     <el-button @click="builderCustomSearch">生成自定义查询JSON</el-button>
@@ -211,6 +224,16 @@
         second: 'second'
     }
 
+    /**
+     * 表单类型
+     */
+    const FormElementType = {
+        text: 'text',
+        textarea: 'textarea',
+        area: 'area',
+        autocomplete: 'autocomplete'
+    }
+
     Vue.component('field', {
         template: '#field-template',
         data() {
@@ -239,6 +262,10 @@
                 conditionOperations: {
                     and: '且',
                     or: '或'
+                },
+                disabled: {
+                    yes: '是',
+                    no: '否'
                 }
             }
         },
@@ -295,7 +322,9 @@
                         compareMap[compare] = GenericQueryOperation[compare]
                     })
 
-                    let filter = field.lookupCode ? 'lookup' : field.columnType == 'date' ? 'time' : ''
+                    let filter = field.columnType == 'enum' ? 'lookup' : field.columnType == 'date' ? 'time' : ''
+                    let type = field.columnType == 'enum' ? 'select' : field.columnType == 'date' ? 'datePicker' : ''
+
                     customSearchFields.push({
                         propertyName: field.propertyName,
                         columnName: field.columnName,
@@ -305,11 +334,12 @@
                         postBrackets: ')',
                         conditionOperation: '且',
                         operation: DefaultCompare[field.columnType],
-                        type: 'text',
+                        type: type,
                         show: true,
                         compareMap: compareMap,
                         placeholder: `请填写${field.label}`,
-                        filter: filter
+                        filter: filter,
+                        disabled: 'no'
                     })
                 })
                 this.customSearchFields = customSearchFields
