@@ -116,6 +116,16 @@
                                 </el-option>
                             </el-select>
                         </el-table-column>
+                        <el-table-column label="placeholder">
+                            <el-input slot-scope="scope" v-model="scope.row.placeholder"></el-input>
+                        </el-table-column>
+                        <el-table-column label="过滤器">
+                            <el-select slot-scope="scope" v-model="scope.row.filter" v-if="scope.row.columnType.toLowerCase() === 'date'">
+                                <el-option v-for="(item, property) in timeFilters" :key="property" :label="item" :value="property">
+                                </el-option>
+                            </el-select>
+                            <label v-else>{{scope.row.filter}}</label>
+                        </el-table-column>
                     </el-table>
                     <el-button @click="builderCustomSearch">生成自定义查询JSON</el-button>
                     <el-input type="textarea" placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件" v-model="generalFieldsJSONString">
@@ -189,6 +199,16 @@
         not_contain: '不包含于',
         between: '范围于',
         not_between: '非范围于'
+    }
+
+    /**
+     * 日期过滤器枚举
+     */
+    const DateFilterEnum = {
+        date: 'date',
+        minute: 'minute',
+        time: 'time',
+        second: 'second'
     }
 
     Vue.component('field', {
@@ -269,24 +289,27 @@
                 let customSearchFields = []
                 let compareMap
 
-                selection.forEach(row => {
+                selection.forEach(field => {
                     compareMap = {}
-                    CompareMap[row.columnType].forEach(compare => {
+                    CompareMap[field.columnType].forEach(compare => {
                         compareMap[compare] = GenericQueryOperation[compare]
                     })
 
+                    let filter = field.lookupCode ? 'lookup' : field.columnType == 'date' ? 'time' : ''
                     customSearchFields.push({
-                        propertyName: row.propertyName,
-                        columnName: row.columnName,
-                        columnType: row.columnType,
-                        label: row.label,
+                        propertyName: field.propertyName,
+                        columnName: field.columnName,
+                        columnType: field.columnType,
+                        label: field.label,
                         frontBrackets: '(',
                         postBrackets: ')',
                         conditionOperation: '且',
-                        operation: DefaultCompare[row.columnType],
+                        operation: DefaultCompare[field.columnType],
                         type: 'text',
                         show: true,
-                        compareMap: compareMap
+                        compareMap: compareMap,
+                        placeholder: `请填写${field.label}`,
+                        filter: filter
                     })
                 })
                 this.customSearchFields = customSearchFields
