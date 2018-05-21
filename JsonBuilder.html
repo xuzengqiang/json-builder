@@ -63,7 +63,7 @@
         <div class="fields-content">
             <el-tabs v-model="currentModule">
                 <el-tab-pane label="自定义列" name="custom-field">
-                    <el-table :data="customColumnFields">
+                    <el-table :data="customColumnFields" @selection-change="columnSelectionChangeHandle">
                         <el-table-column type="selection"></el-table-column>
                         <el-table-column type="index" label="序号"></el-table-column>
                         <el-table-column prop="label" label="字段名称"></el-table-column>
@@ -85,7 +85,7 @@
                         <el-table-column prop="lookupCode" label="数据字典"></el-table-column>
                     </el-table>
                     <el-button @click="builderCustomColumn">生成自定义列JSON</el-button>
-                    <el-input type="textarea" placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件" v-model="generalFieldsJSONString">
+                    <el-input type="textarea" placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件" v-model="customColumnJSONString">
                     </el-input>
                 </el-tab-pane>
                 <el-tab-pane label="自定义查询字段" name="custom-search">
@@ -108,6 +108,10 @@
                         <el-table-column label="表单类型">
                             <template slot-scope="scope">
                                 <label v-if="scope.row.columnType == 'date' || scope.row.columnType == 'enum'">{{scope.row.type}}</label>
+                                <el-select v-else v-model="scope.row.type">
+                                    <el-option v-for="(item, property) in stringFileTypes" :key="property" :label="item" :value="property">
+                                    </el-option>
+                                </el-select>
                             </template>
                         </el-table-column>
                         <el-table-column label="是否禁用">
@@ -116,8 +120,12 @@
                                 </el-option>
                             </el-select>
                         </el-table-column>
-                        <el-table-column prop="frontBrackets" label="前括号"></el-table-column>
-                        <el-table-column prop="postBrackets" label="后括号"></el-table-column>
+                        <el-table-column label="前括号">
+                            <el-input slot-scope="scope" v-model="scope.row.frontBrackets"></el-input>
+                        </el-table-column>
+                        <el-table-column label="后括号">
+                            <el-input slot-scope="scope" v-model="scope.row.postBrackets"></el-input>
+                        </el-table-column>
                         <el-table-column label="条件关系">
                             <el-select slot-scope="scope" v-model="scope.row.conditionOperation">
                                 <el-option v-for="(item, property) in conditionOperations" :key="property" :label="item" :value="property">
@@ -130,18 +138,17 @@
                                 </el-option>
                             </el-select>
                         </el-table-column>
-                        <el-table-column label="过滤器">
+                        <el-table-column label="日期类型">
                             <template slot-scope="scope">
-                                <el-select v-model="scope.row.filter" v-if="scope.row.columnType.toLowerCase() === 'date'">
-                                    <el-option v-for="(item, property) in timeFilters" :key="property" :label="item" :value="property">
+                                <el-select v-model="scope.row.dateType" v-if="scope.row.columnType.toLowerCase() === 'date'">
+                                    <el-option v-for="(item, property) in dateTypes" :key="property" :label="item" :value="property">
                                     </el-option>
                                 </el-select>
-                                <label v-else>{{scope.row.filter}}</label>
                             </template>
                         </el-table-column>
                     </el-table>
                     <el-button @click="builderCustomSearch">生成自定义查询JSON</el-button>
-                    <el-input type="textarea" placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件" v-model="generalFieldsJSONString">
+                    <el-input type="textarea" placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件" v-model="customSearchJSONString">
                     </el-input>
                 </el-tab-pane>
             </el-tabs>
@@ -243,6 +250,53 @@
         }
     })
 
+    const UUID = (function () {
+        const UUID_STRING =
+            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+        /**
+         * 生成UUID
+         * @param {Integer} len - UUID的长度
+         * @param {Integer} radix - 进制
+         * @see {Math.uuid.js}
+         * @example
+         * Framework.uuid() => F343F26D-2707-473E-840F-B11A96DDD4E6
+         * Framework.uuid(8, 2) => 00011100
+         * Framework.uuid(32, 16) => 0CECFF9C8AA4C227E2A289576DBAF208
+         */
+        const UUID = (len, radix) => {
+            const chars = UUID_STRING.split("");
+
+            len = /^[1-9]\d*$/.test(len) ? parseInt(len, 10) : null;
+            radix = /^[1-9]\d*$/.test(radix) ? parseInt(radix, 10) : chars.length;
+
+            let uuid = [];
+            let i;
+
+            if (len) {
+                for (i = 0; i < len; i++) {
+                    uuid[i] = chars[0 | (Math.random() * radix)];
+                }
+            } else {
+                let r;
+
+                uuid[8] = uuid[13] = uuid[18] = uuid[23] = "-";
+                uuid[14] = "4";
+
+                for (i = 0; i < 36; i++) {
+                    if (!uuid[i]) {
+                        r = 0 | (Math.random() * 16);
+                        uuid[i] = chars[i == 19 ? (r & 0x3) | 0x8 : r];
+                    }
+                }
+            }
+
+            return uuid.join("");
+        };
+
+        return UUID;
+    })()
+
     new Vue({
         el: '#app',
         data() {
@@ -252,6 +306,9 @@
                 customColumnFields: [],
                 fields: [],
                 customSearchFields: [],
+                customColumnJSONString: '',
+                customSearchJSONString: '',
+                selection: [],
                 currentModule: 'custom-field',
                 timeFilters: {
                     date: 'date',
@@ -266,6 +323,24 @@
                 disabled: {
                     yes: '是',
                     no: '否'
+                },
+                stringFileTypes: {
+                    text: 'text',
+                    autocomplete: 'autocomplete',
+                    area: 'area',
+                    radio: 'radio',
+                    checkbox: 'checkbox',
+                    checkboxGroup: 'checkboxGroup'
+                },
+                dateTypes: {
+                    year: 'year',
+                    month: 'month',
+                    date: 'date',
+                    dates: 'dates',
+                    week: 'week',
+                    datetime: 'datetime',
+                    datetimerange: 'datetimerange',
+                    daterange: 'daterange'
                 }
             }
         },
@@ -295,7 +370,8 @@
                                 columnName: field.columnName,
                                 columnType: field.columnType,
                                 label: field.label,
-                                lookupCode: field.lookupCode || ''
+                                lookupCode: field.lookupCode || '',
+                                id: UUID()
                             }
 
                             let filter = field.lookupCode ? 'lookup' : field.columnType == 'date' ? 'time' : ''
@@ -312,6 +388,9 @@
                     }
                 }
             },
+            columnSelectionChangeHandle(selection) {
+                this.selection = selection
+            },
             selectionChangeHandle(selection) {
                 let customSearchFields = []
                 let compareMap
@@ -322,8 +401,7 @@
                         compareMap[compare] = GenericQueryOperation[compare]
                     })
 
-                    let filter = field.columnType == 'enum' ? 'lookup' : field.columnType == 'date' ? 'time' : ''
-                    let type = field.columnType == 'enum' ? 'select' : field.columnType == 'date' ? 'datePicker' : ''
+                    let type = field.columnType == 'enum' ? 'select' : field.columnType == 'date' ? 'datePicker' : 'text'
 
                     customSearchFields.push({
                         propertyName: field.propertyName,
@@ -332,29 +410,75 @@
                         label: field.label,
                         frontBrackets: '(',
                         postBrackets: ')',
-                        conditionOperation: '且',
+                        conditionOperation: 'and',
                         operation: DefaultCompare[field.columnType],
                         type: type,
                         show: true,
                         compareMap: compareMap,
                         placeholder: `请填写${field.label}`,
-                        filter: filter,
-                        disabled: 'no'
+                        disabled: 'no',
+                        lookupCode: field.lookupCode,
+                        dateType: 'date'
                     })
                 })
                 this.customSearchFields = customSearchFields
             },
-            configCustomColumn() {
-
-            },
-            configCustomSearch() {
-
-            },
             builderCustomColumn() {
+                let fields = []
+                let found
+                let base
+                this.customColumnFields.forEach(item => {
+                    found = this.selection.find(row => row.id === item.id)
 
+                    base = {
+                        label: item.label,
+                        key: item.propertyName,
+                        show: !!found,
+                        width: item.width + 'px'
+                    }
+
+                    if (item.lookupCode) {
+                        base.filter = {
+                            type: 'lookup',
+                            args: [item.lookupCode]
+                        }
+                    } else if (item.columnType === 'date') {
+                        base.filter = item.filter
+                    }
+                    fields.push(base)
+                })
+                this.customColumnJSONString = JSON.stringify(fields, null, '\t')
             },
             builderCustomSearch() {
+                let fields = []
+                let base
+                this.customSearchFields.forEach(item => {
+                    base = {
+                        propertyName: item.propertyName,
+                        columnName: item.columnName,
+                        frontBrackets: item.frontBrackets,
+                        postBrackets: item.postBrackets,
+                        conditionOperation: item.conditionOperation,
+                        operation: item.operation,
+                        columnType: item.columnType,
+                        label: item.label,
+                        type: item.type,
+                        show: true,
+                        placeholder: item.placeholder,
+                        disabled: item.disabled === 'no' ? false : true
+                    }
 
+                    switch (item.columnType) {
+                        case 'date':
+                            base.dateType = item.dateType
+                            break
+                        case 'enum':
+                            base.lookupCode = item.lookupCode
+                    }
+
+                    fields.push(base)
+                })
+                this.customSearchJSONString = JSON.stringify(fields, null, '\t')
             }
         }
     });
