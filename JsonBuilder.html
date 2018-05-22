@@ -131,21 +131,6 @@
                 </el-tab-pane>
             </el-tabs>
         </div>
-        <!-- <div class="json-builder">
-            <el-button @click="configCustomColumn">配置自定义列</el-button>
-            <el-button @click="configCustomSearch">配置自定义查询</el-button>
-        </div> -->
-        <!-- <div class="json-builder">
-            <button class="builder-custom-column">生成自定义列JSON</button>
-            <button class="builder-custom-search">生成自定义查询JSON</button>
-            (
-            <button class="json-copy">复制到剪切板</button>
-            )
-        </div>
-        <div class="json-console">
-            <pre>
-            </pre>
-        </div> -->
     </div>
 </body>
 
@@ -218,53 +203,6 @@
         area: 'area',
         autocomplete: 'autocomplete'
     }
-
-    const UUID = (function () {
-        const UUID_STRING =
-            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-        /**
-         * 生成UUID
-         * @param {Integer} len - UUID的长度
-         * @param {Integer} radix - 进制
-         * @see {Math.uuid.js}
-         * @example
-         * Framework.uuid() => F343F26D-2707-473E-840F-B11A96DDD4E6
-         * Framework.uuid(8, 2) => 00011100
-         * Framework.uuid(32, 16) => 0CECFF9C8AA4C227E2A289576DBAF208
-         */
-        const UUID = (len, radix) => {
-            const chars = UUID_STRING.split("");
-
-            len = /^[1-9]\d*$/.test(len) ? parseInt(len, 10) : null;
-            radix = /^[1-9]\d*$/.test(radix) ? parseInt(radix, 10) : chars.length;
-
-            let uuid = [];
-            let i;
-
-            if (len) {
-                for (i = 0; i < len; i++) {
-                    uuid[i] = chars[0 | (Math.random() * radix)];
-                }
-            } else {
-                let r;
-
-                uuid[8] = uuid[13] = uuid[18] = uuid[23] = "-";
-                uuid[14] = "4";
-
-                for (i = 0; i < 36; i++) {
-                    if (!uuid[i]) {
-                        r = 0 | (Math.random() * 16);
-                        uuid[i] = chars[i == 19 ? (r & 0x3) | 0x8 : r];
-                    }
-                }
-            }
-
-            return uuid.join("");
-        };
-
-        return UUID;
-    })()
 
     new Vue({
         el: '#app',
