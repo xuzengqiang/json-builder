@@ -21,49 +21,19 @@
 <body>
     <div id="app" class="json-container">
         <div class="json-input">
-            <div class="json-content">
-                <el-input type="textarea" placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件" v-model="generalFieldsJSONString">
-                </el-input>
-                <!-- <textarea placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件">
-                    [
-                        {
-                            "propertyName": "orderNumber",
-                            "columnName": "om.order_number",
-                            "columnType": "string",
-                            "label": "下单编码"
-                        },
-                        {
-                            "propertyName": "orderSource",
-                            "columnName": "om.order_source",
-                            "columnType": "enum",
-                            "label": "下单来源",
-                            "lookupCode": "oms_order_source"
-                        },
-                        {
-                            "propertyName": "goodsTime",
-                            "columnName": "om.goods_time",
-                            "columnType": "date",
-                            "label": "货好时间"
-                        },
-                        {
-                            "propertyName": "estimateWaybill",
-                            "columnName": "om.estimate_waybill",
-                            "columnType": "number",
-                            "label": "票数"
-                        }
-                        ]
-
-                </textarea> -->
-            </div>
+            <el-input type="textarea" placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件" v-model="generalFieldsJSONString">
+            </el-input>
         </div>
         <div class="json-runner">
             <el-button type="primary" @click="analyzeJSON">解析JSON</el-button>
-            <!-- <button class="analyze-json">解析JSON</button> -->
+            <p>
+                <label>自定义列中的复选框勾选后,表示会默认展示的列,而自定义查询字段复选框勾选后表示需要显示的表单元素</label>
+            </p>
         </div>
         <div class="fields-content">
             <el-tabs v-model="currentModule">
                 <el-tab-pane label="自定义列" name="custom-field">
-                    <el-table :data="customColumnFields" @selection-change="columnSelectionChangeHandle">
+                    <el-table :data="customColumnFields" @selection-change="columnSelectionChangeHandle" height="400">
                         <el-table-column type="selection"></el-table-column>
                         <el-table-column type="index" label="序号"></el-table-column>
                         <el-table-column prop="label" label="字段名称"></el-table-column>
@@ -84,12 +54,14 @@
                         </el-table-column>
                         <el-table-column prop="lookupCode" label="数据字典"></el-table-column>
                     </el-table>
-                    <el-button @click="builderCustomColumn">生成自定义列JSON</el-button>
-                    <el-input type="textarea" placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件" v-model="customColumnJSONString">
-                    </el-input>
+                    <div class="json-builder">
+                        <el-button type="primary" @click="builderCustomColumn">生成自定义列JSON</el-button>
+                        <el-input type="textarea" v-model="customColumnJSONString">
+                        </el-input>
+                    </div>
                 </el-tab-pane>
                 <el-tab-pane label="自定义查询字段" name="custom-search">
-                    <el-table :data="fields" @selection-change="selectionChangeHandle">
+                    <el-table :data="fields" @selection-change="selectionChangeHandle" height="400">
                         <el-table-column type="selection"></el-table-column>
                         <el-table-column type="index" label="序号"></el-table-column>
                         <el-table-column prop="label" label="字段名称"></el-table-column>
@@ -99,57 +71,65 @@
                         <el-table-column prop="lookupCode" label="数据字典"></el-table-column>
                     </el-table>
 
-                    <el-table :data="customSearchFields" v-if="customSearchFields.length">
-                        <el-table-column type="index" label="序号"></el-table-column>
-                        <el-table-column prop="label" label="字段名称"></el-table-column>
-                        <el-table-column label="placeholder">
-                            <el-input slot-scope="scope" v-model="scope.row.placeholder"></el-input>
-                        </el-table-column>
-                        <el-table-column label="表单类型">
-                            <template slot-scope="scope">
-                                <label v-if="scope.row.columnType == 'date' || scope.row.columnType == 'enum'">{{scope.row.type}}</label>
-                                <el-select v-else v-model="scope.row.type">
-                                    <el-option v-for="(item, property) in stringFileTypes" :key="property" :label="item" :value="property">
+                    <div class="custom-search-field-config" v-if="customSearchFields.length">
+                        <p class="tip">
+                            注意：自定义查询字段详细配置.后续会持续优化,如遇到特殊情况可以重新编辑.
+                        </p>
+                        <el-table :data="customSearchFields">
+                            <el-table-column type="index" label="序号"></el-table-column>
+                            <el-table-column prop="label" label="字段名称"></el-table-column>
+                            <el-table-column label="placeholder">
+                                <el-input slot-scope="scope" v-model="scope.row.placeholder"></el-input>
+                            </el-table-column>
+                            <el-table-column label="表单类型">
+                                <template slot-scope="scope">
+                                    <label v-if="scope.row.columnType == 'date' || scope.row.columnType == 'enum'">{{scope.row.type}}</label>
+                                    <el-select v-else v-model="scope.row.type">
+                                        <el-option v-for="(item, property) in stringFileTypes" :key="property" :label="item" :value="property">
+                                        </el-option>
+                                    </el-select>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="是否禁用">
+                                <el-select slot-scope="scope" v-model="scope.row.disabled">
+                                    <el-option v-for="(item, property) in disabled" :key="property" :label="item" :value="property">
                                     </el-option>
                                 </el-select>
-                            </template>
-                        </el-table-column>
-                        <el-table-column label="是否禁用">
-                            <el-select slot-scope="scope" v-model="scope.row.disabled">
-                                <el-option v-for="(item, property) in disabled" :key="property" :label="item" :value="property">
-                                </el-option>
-                            </el-select>
-                        </el-table-column>
-                        <el-table-column label="前括号">
-                            <el-input slot-scope="scope" v-model="scope.row.frontBrackets"></el-input>
-                        </el-table-column>
-                        <el-table-column label="后括号">
-                            <el-input slot-scope="scope" v-model="scope.row.postBrackets"></el-input>
-                        </el-table-column>
-                        <el-table-column label="条件关系">
-                            <el-select slot-scope="scope" v-model="scope.row.conditionOperation">
-                                <el-option v-for="(item, property) in conditionOperations" :key="property" :label="item" :value="property">
-                                </el-option>
-                            </el-select>
-                        </el-table-column>
-                        <el-table-column label="条件操作符">
-                            <el-select slot-scope="scope" v-model="scope.row.operation">
-                                <el-option v-for="(operation, property) in scope.row.compareMap" :key="property" :label="operation" :value="property">
-                                </el-option>
-                            </el-select>
-                        </el-table-column>
-                        <el-table-column label="日期类型">
-                            <template slot-scope="scope">
-                                <el-select v-model="scope.row.dateType" v-if="scope.row.columnType.toLowerCase() === 'date'">
-                                    <el-option v-for="(item, property) in dateTypes" :key="property" :label="item" :value="property">
+                            </el-table-column>
+                            <el-table-column label="前括号">
+                                <el-input slot-scope="scope" v-model="scope.row.frontBrackets"></el-input>
+                            </el-table-column>
+                            <el-table-column label="后括号">
+                                <el-input slot-scope="scope" v-model="scope.row.postBrackets"></el-input>
+                            </el-table-column>
+                            <el-table-column label="条件关系">
+                                <el-select slot-scope="scope" v-model="scope.row.conditionOperation">
+                                    <el-option v-for="(item, property) in conditionOperations" :key="property" :label="item" :value="property">
                                     </el-option>
                                 </el-select>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                    <el-button @click="builderCustomSearch">生成自定义查询JSON</el-button>
-                    <el-input type="textarea" placeholder="你可以在此输入通用查询JSON串,也可以在选择通用查询配置json文件" v-model="customSearchJSONString">
-                    </el-input>
+                            </el-table-column>
+                            <el-table-column label="条件操作符">
+                                <el-select slot-scope="scope" v-model="scope.row.operation">
+                                    <el-option v-for="(operation, property) in scope.row.compareMap" :key="property" :label="operation" :value="property">
+                                    </el-option>
+                                </el-select>
+                            </el-table-column>
+                            <el-table-column label="日期类型">
+                                <template slot-scope="scope">
+                                    <el-select v-model="scope.row.dateType" v-if="scope.row.columnType.toLowerCase() === 'date'">
+                                        <el-option v-for="(item, property) in dateTypes" :key="property" :label="item" :value="property">
+                                        </el-option>
+                                    </el-select>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+
+                    <div class="json-builder">
+                        <el-button type="primary" @click="builderCustomSearch">生成自定义查询JSON</el-button>
+                        <el-input type="textarea" v-model="customSearchJSONString">
+                        </el-input>
+                    </div>
                 </el-tab-pane>
             </el-tabs>
         </div>
@@ -240,15 +220,6 @@
         area: 'area',
         autocomplete: 'autocomplete'
     }
-
-    Vue.component('field', {
-        template: '#field-template',
-        data() {
-            return {
-
-            }
-        }
-    })
 
     const UUID = (function () {
         const UUID_STRING =
@@ -482,55 +453,6 @@
             }
         }
     });
-
-
-    (() => {
-        const dataElement = document.querySelector('.json-content textarea')
-        const fieldsContainer = document.querySelector('.fields-content')
-        const consoleTextarea = document.querySelector('.json-console pre')
-
-        let builder = null
-
-        const jsonconfig = method => {
-            if (builder && typeof builder[method] === 'function') {
-                builder[method]()
-            }
-        }
-
-        const jsonbuilder = method => {
-            if (builder && typeof builder[method] === 'function') {
-                let json = builder[method]()
-                consoleTextarea.innerHTML = JSON.stringify(json, null, '\t')
-            }
-        }
-
-        const addClickEvent = (selector, fun) => {
-            let element = document.querySelector(selector)
-            if (element) {
-                element.addEventListener('click', () => {
-                    fun()
-                    return false
-                })
-            }
-        }
-
-        addClickEvent('.analyze-json', () => {
-            try {
-                builder = new JSONBuilder({
-                    json: dataElement.value,
-                    fieldsContainer: fieldsContainer
-                })
-            } catch (e) {
-                alert(e)
-                builder = null
-            }
-        })
-
-        addClickEvent('.config-custom-column', () => jsonconfig('configCustomColumn'))
-        addClickEvent('.config-custom-search', () => jsonconfig('configCustomSearch'))
-        addClickEvent('.builder-custom-column', () => jsonbuilder('builderCustomColumn'))
-        addClickEvent('.builder-custom-search', () => jsonbuilder('builderCustomSearch'))
-    })()
 </script>
 
 </html>
