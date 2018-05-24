@@ -81,8 +81,8 @@ dom.ready(() => {
                 customColumnFields: [],
                 fields: [],
                 customSearchFields: [],
-                customColumnJSONString: '',
-                customSearchJSONString: '',
+                customColumnJSON: '',
+                customSearchJSON: '',
                 selection: [],
                 currentModule: 'custom-field',
                 timeFilters: {
@@ -223,7 +223,7 @@ dom.ready(() => {
                     }
                     fields.push(base)
                 })
-                this.customColumnJSONString = JSON.stringify(fields, null, '\t')
+                this.customColumnJSON = fields
             },
             builderCustomSearch() {
                 let fields = []
@@ -254,7 +254,7 @@ dom.ready(() => {
 
                     fields.push(base)
                 })
-                this.customSearchJSONString = JSON.stringify(fields, null, '\t')
+                this.customSearchJSON = fields
             }
         }
     })

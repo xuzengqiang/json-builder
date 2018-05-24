@@ -57,11 +57,7 @@
                         </el-table-column>
                         <el-table-column prop="lookupCode" label="数据字典"></el-table-column>
                     </el-table>
-                    <div class="json-builder">
-                        <el-button type="primary" @click="builderCustomColumn">生成自定义列JSON</el-button>
-                        <el-input type="textarea" v-model="customColumnJSONString">
-                        </el-input>
-                    </div>
+                    <builder @click="builderCustomColumn" :json="customColumnJSON">生成自定义列JSON</builder>
                 </el-tab-pane>
                 <el-tab-pane label="自定义查询字段" name="custom-search">
                     <el-table :data="fields" @selection-change="selectionChangeHandle" height="400">
@@ -128,11 +124,7 @@
                         </el-table>
                     </div>
 
-                    <div class="json-builder">
-                        <el-button type="primary" @click="builderCustomSearch">生成自定义查询JSON</el-button>
-                        <el-input type="textarea" v-model="customSearchJSONString">
-                        </el-input>
-                    </div>
+                    <builder @click="builderCustomSearch" :json="customSearchJSON">生成自定义列JSON</builder>
                 </el-tab-pane>
             </el-tabs>
         </div>
@@ -147,6 +139,21 @@
 <!-- 自定义查询template -->
 <script type="text/x-template" id="custom-search-template">
     <label>自定义查询</label>
+</script>
+
+<!-- 
+json构建
+@author xuzengqiang
+@date 2018-5-24 23:59:16
+-->
+<script type="text/x-template" id="builder-template">
+<div class="json-builder">
+    <el-button type="primary" @click="clickHandle">
+        <slot></slot>
+    </el-button>
+    <el-input type="textarea" v-model="jsonString">
+    </el-input>
+</div>
 </script>
 
 </html>

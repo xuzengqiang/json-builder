@@ -6,5 +6,33 @@
  */
 const Builder = {
     template: '#builder-template',
-    data() {}
+    name: 'Builder',
+    /**
+     * 属性列表
+     * @property {Object|Array} json - 需要输出的json数据
+     */
+    props: {
+        json: [Object, Array]
+    },
+    computed: {
+        /**
+         * 生成json字符串
+         */
+        jsonString() {
+            if (!this.json) return ''
+
+            try {
+                return JSON.stringify(this.json, null, '\t')
+            } catch (e) {
+                console.error('构建失败')
+                console.error(e)
+                return ''
+            }
+        }
+    },
+    methods: {
+        clickHandle() {
+            this.$emit('click')
+        }
+    }
 }
