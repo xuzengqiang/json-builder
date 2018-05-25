@@ -3,7 +3,7 @@
  * @fileOverview json构建
  * @author xuzengqiang <253948113@qq.com>
  * @date 2018-05-23 12:37:59
- * @version 1.0.0
+ * @version 1.0.1
  */
 dom.ready(() => {
     new Vue({
