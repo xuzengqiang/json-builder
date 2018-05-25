@@ -39,71 +39,7 @@
                     <custom-field :fields="customColumnFields" />
                 </el-tab-pane>
                 <el-tab-pane label="自定义查询字段" name="custom-search">
-                    <el-table :data="fields" @selection-change="selectionChangeHandle" height="400">
-                        <el-table-column type="selection"></el-table-column>
-                        <el-table-column type="index" label="序号"></el-table-column>
-                        <el-table-column prop="label" label="字段名称"></el-table-column>
-                        <el-table-column prop="propertyName" label="属性名称"></el-table-column>
-                        <el-table-column prop="columnName" label="数据库列名"></el-table-column>
-                        <el-table-column prop="columnType" label="数据库类型"></el-table-column>
-                        <el-table-column prop="lookupCode" label="数据字典"></el-table-column>
-                    </el-table>
-
-                    <div class="custom-search-field-config" v-if="customSearchFields.length">
-                        <p class="tip">
-                            注意：自定义查询字段详细配置.后续会持续优化,如遇到特殊情况可以重新编辑.
-                        </p>
-                        <el-table :data="customSearchFields">
-                            <el-table-column type="index" label="序号"></el-table-column>
-                            <el-table-column prop="label" label="字段名称"></el-table-column>
-                            <el-table-column label="placeholder">
-                                <el-input slot-scope="scope" v-model="scope.row.placeholder"></el-input>
-                            </el-table-column>
-                            <el-table-column label="表单类型">
-                                <template slot-scope="scope">
-                                    <label v-if="scope.row.columnType == 'date' || scope.row.columnType == 'enum'">{{scope.row.type}}</label>
-                                    <el-select v-else v-model="scope.row.type">
-                                        <el-option v-for="(item, property) in stringFileTypes" :key="property" :label="item" :value="property">
-                                        </el-option>
-                                    </el-select>
-                                </template>
-                            </el-table-column>
-                            <el-table-column label="是否禁用">
-                                <el-select slot-scope="scope" v-model="scope.row.disabled">
-                                    <el-option v-for="(item, property) in disabled" :key="property" :label="item" :value="property">
-                                    </el-option>
-                                </el-select>
-                            </el-table-column>
-                            <el-table-column label="前括号">
-                                <el-input slot-scope="scope" v-model="scope.row.frontBrackets"></el-input>
-                            </el-table-column>
-                            <el-table-column label="后括号">
-                                <el-input slot-scope="scope" v-model="scope.row.postBrackets"></el-input>
-                            </el-table-column>
-                            <el-table-column label="条件关系">
-                                <el-select slot-scope="scope" v-model="scope.row.conditionOperation">
-                                    <el-option v-for="(item, property) in conditionOperations" :key="property" :label="item" :value="property">
-                                    </el-option>
-                                </el-select>
-                            </el-table-column>
-                            <el-table-column label="条件操作符">
-                                <el-select slot-scope="scope" v-model="scope.row.operation">
-                                    <el-option v-for="(operation, property) in scope.row.compareMap" :key="property" :label="operation" :value="property">
-                                    </el-option>
-                                </el-select>
-                            </el-table-column>
-                            <el-table-column label="日期类型">
-                                <template slot-scope="scope">
-                                    <el-select v-model="scope.row.dateType" v-if="scope.row.columnType.toLowerCase() === 'date'">
-                                        <el-option v-for="(item, property) in dateTypes" :key="property" :label="item" :value="property">
-                                        </el-option>
-                                    </el-select>
-                                </template>
-                            </el-table-column>
-                        </el-table>
-                    </div>
-
-                    <builder @click="builderCustomSearch" :json="customSearchJSON">生成自定义列JSON</builder>
+                    <custom-search :fields="customSearchFields" />
                 </el-tab-pane>
             </el-tabs>
         </div>
@@ -144,7 +80,73 @@
 
 <!-- 自定义查询template -->
 <script type="text/x-template" id="custom-search-template">
-    <label>自定义查询</label>
+    <div class="custom-search-editor">
+        <el-table :data="fields" @selection-change="selectionChangeHandle" height="400">
+            <el-table-column type="selection"></el-table-column>
+            <el-table-column type="index" label="序号"></el-table-column>
+            <el-table-column prop="label" label="字段名称"></el-table-column>
+            <el-table-column prop="propertyName" label="属性名称"></el-table-column>
+            <el-table-column prop="columnName" label="数据库列名"></el-table-column>
+            <el-table-column prop="columnType" label="数据库类型"></el-table-column>
+            <el-table-column prop="lookupCode" label="数据字典"></el-table-column>
+        </el-table>
+
+        <div class="custom-search-field-config" v-if="customSearchFields.length">
+            <p class="tip">
+                注意：自定义查询字段详细配置.后续会持续优化,如遇到特殊情况可以重新编辑.
+            </p>
+            <el-table :data="customSearchFields">
+                <el-table-column type="index" label="序号"></el-table-column>
+                <el-table-column prop="label" label="字段名称"></el-table-column>
+                <el-table-column label="placeholder">
+                    <el-input slot-scope="scope" v-model="scope.row.placeholder"></el-input>
+                </el-table-column>
+                <el-table-column label="表单类型">
+                    <template slot-scope="scope">
+                        <label v-if="scope.row.columnType == 'date' || scope.row.columnType == 'enum'">{{scope.row.type}}</label>
+                        <el-select v-else v-model="scope.row.type">
+                            <el-option v-for="(item, property) in elementTypes" :key="property" :label="item" :value="property">
+                            </el-option>
+                        </el-select>
+                    </template>
+                </el-table-column>
+                <el-table-column label="是否禁用">
+                    <el-select slot-scope="scope" v-model="scope.row.disabled">
+                        <el-option v-for="(item, property) in disableds" :key="property" :label="item" :value="property">
+                        </el-option>
+                    </el-select>
+                </el-table-column>
+                <el-table-column label="前括号">
+                    <el-input slot-scope="scope" v-model="scope.row.frontBrackets"></el-input>
+                </el-table-column>
+                <el-table-column label="后括号">
+                    <el-input slot-scope="scope" v-model="scope.row.postBrackets"></el-input>
+                </el-table-column>
+                <el-table-column label="条件关系">
+                    <el-select slot-scope="scope" v-model="scope.row.conditionOperation">
+                        <el-option v-for="(item, property) in conditionOperations" :key="property" :label="item" :value="property">
+                        </el-option>
+                    </el-select>
+                </el-table-column>
+                <el-table-column label="条件操作符">
+                    <el-select slot-scope="scope" v-model="scope.row.operation">
+                        <el-option v-for="(operation, property) in scope.row.compareMap" :key="property" :label="operation" :value="property">
+                        </el-option>
+                    </el-select>
+                </el-table-column>
+                <el-table-column label="日期类型">
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.dateType" v-if="scope.row.columnType.toLowerCase() === 'date'">
+                            <el-option v-for="(item, property) in dateTypes" :key="property" :label="item" :value="property">
+                            </el-option>
+                        </el-select>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
+
+        <builder @click="builderCustomSearch" :json="customSearchJSON">生成自定义列JSON</builder>
+    </div>
 </script>
 
 <!-- 

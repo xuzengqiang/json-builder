@@ -23,7 +23,7 @@
         data () {
             return {
                 selection: [],
-                customColumnJSON: [],
+                customColumnJSON: null,
                 filters: TimeFilter
             }
         },
