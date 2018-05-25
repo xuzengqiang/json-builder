@@ -56,7 +56,9 @@
         <el-table :data="fields" @selection-change="selectionChangeHandle" height="400" :row-class-name="tableRowClassName">
             <el-table-column type="selection"></el-table-column>
             <el-table-column type="index" label="序号"></el-table-column>
-            <el-table-column prop="label" label="字段名称"></el-table-column>
+            <el-table-column label="字段名称">
+                <el-input slot-scope="scope" v-model="scope.row.label"></el-input>
+            </el-table-column>
             <el-table-column label="是否移除该列">
                 <template slot-scope="scope">
                     <el-select v-model="scope.row.ignore">
@@ -105,7 +107,9 @@
             </p>
             <el-table :data="customSearchFields">
                 <el-table-column type="index" label="序号"></el-table-column>
-                <el-table-column prop="label" label="字段名称"></el-table-column>
+                <el-table-column label="字段名称">
+                    <el-input slot-scope="scope" v-model="scope.row.label"></el-input>
+                </el-table-column>
                 <el-table-column label="placeholder">
                     <el-input slot-scope="scope" v-model="scope.row.placeholder"></el-input>
                 </el-table-column>
