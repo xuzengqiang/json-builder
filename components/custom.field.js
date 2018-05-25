@@ -17,6 +17,15 @@
         second: 'second'
     }
 
+    /**
+     * 是否忽略该列
+     * @enum
+     */
+    const ignores = {
+        yes: '是',
+        no: '否'
+    }
+
     const CustomFieldComponent = {
         template: '#custom-field-template',
         name: 'CustomField',
@@ -24,7 +33,8 @@
             return {
                 selection: [],
                 customColumnJSON: null,
-                filters: TimeFilter
+                filters: TimeFilter,
+                ignores: ignores
             }
         },
         /**
@@ -55,7 +65,9 @@
                 let found
                 let json
 
-                this.selection.forEach(item => {
+                this.fields.forEach(item => {
+                    if (/^(yes)$/i.test(item.ignore)) return
+
                     found = this.selection.find(row => row.id === item.id)
 
                     json = {
@@ -76,6 +88,14 @@
                     fields.push(json)
                 })
                 this.customColumnJSON = fields
+            },
+            /**
+             * 高亮表格行
+             */
+            tableRowClassName ({ row, rowIndex }) {
+                if (row.ignore === 'yes') {
+                    return 'ignore'
+                }
             }
         }
     }

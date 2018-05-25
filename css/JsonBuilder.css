@@ -68,6 +68,13 @@ html {
     background: rgb(85, 42, 135);
     border-color: rgb(85, 42, 135);
 }
+.json-container .el-table .ignore,
+.json-container .el-table .ignore:hover td,
+.json-container .el-table .selected,
+.json-container .el-table .selected:hover td{
+    background:rgb(231, 152, 152);
+    color:#FFF;
+}
 .json-container .el-table__header th {
     color: rgb(127, 94, 161);
 }

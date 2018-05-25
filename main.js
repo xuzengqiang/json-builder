@@ -54,6 +54,7 @@ dom.ready(() => {
                             this.customColumnFields.push(
                                 Object.assign({}, json, {
                                     width: '100',
+                                    ignore: 'no',
                                     filter: filter
                                 })
                             )

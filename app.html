@@ -53,10 +53,18 @@
 -->
 <script type="text/x-template" id="custom-field-template">
     <div id="custom-field-editor">
-        <el-table :data="fields" @selection-change="selectionChangeHandle" height="400">
+        <el-table :data="fields" @selection-change="selectionChangeHandle" height="400" :row-class-name="tableRowClassName">
             <el-table-column type="selection"></el-table-column>
             <el-table-column type="index" label="序号"></el-table-column>
             <el-table-column prop="label" label="字段名称"></el-table-column>
+            <el-table-column label="是否移除该列">
+                <template slot-scope="scope">
+                    <el-select v-model="scope.row.ignore">
+                        <el-option v-for="(item, property) in ignores" :key="property" :label="item" :value="property">
+                        </el-option>
+                    </el-select>
+                </template>
+            </el-table-column>
             <el-table-column label="宽度(px)">
                 <el-input slot-scope="scope" v-model="scope.row.width"></el-input>
             </el-table-column>
