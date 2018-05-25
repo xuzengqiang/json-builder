@@ -36,28 +36,7 @@
         <div class="fields-content">
             <el-tabs v-model="currentModule">
                 <el-tab-pane label="自定义列" name="custom-field">
-                    <el-table :data="customColumnFields" @selection-change="columnSelectionChangeHandle" height="400">
-                        <el-table-column type="selection"></el-table-column>
-                        <el-table-column type="index" label="序号"></el-table-column>
-                        <el-table-column prop="label" label="字段名称"></el-table-column>
-                        <el-table-column label="宽度(px)">
-                            <el-input slot-scope="scope" v-model="scope.row.width"></el-input>
-                        </el-table-column>
-                        <el-table-column prop="propertyName" label="属性名称"></el-table-column>
-                        <el-table-column prop="columnName" label="数据库列名"></el-table-column>
-                        <el-table-column prop="columnType" label="数据库类型"></el-table-column>
-                        <el-table-column label="过滤器">
-                            <template slot-scope="scope">
-                                <el-select v-model="scope.row.filter" v-if="scope.row.columnType.toLowerCase() === 'date'">
-                                    <el-option v-for="(item, property) in timeFilters" :key="property" :label="item" :value="property">
-                                    </el-option>
-                                </el-select>
-                                <label v-else>{{scope.row.filter}}</label>
-                            </template>
-                        </el-table-column>
-                        <el-table-column prop="lookupCode" label="数据字典"></el-table-column>
-                    </el-table>
-                    <builder @click="builderCustomColumn" :json="customColumnJSON">生成自定义列JSON</builder>
+                    <custom-field :fields="customColumnFields" />
                 </el-tab-pane>
                 <el-tab-pane label="自定义查询字段" name="custom-search">
                     <el-table :data="fields" @selection-change="selectionChangeHandle" height="400">
@@ -131,9 +110,36 @@
     </div>
 </body>
 
-<!-- 自定义列template -->
+<!-- 
+自定义列
+@author xuzengqiang
+@date 2018-05-25 11:51:56
+-->
 <script type="text/x-template" id="custom-field-template">
-    <label>自定义列</label>
+    <div id="custom-field-editor">
+        <el-table :data="fields" @selection-change="selectionChangeHandle" height="400">
+            <el-table-column type="selection"></el-table-column>
+            <el-table-column type="index" label="序号"></el-table-column>
+            <el-table-column prop="label" label="字段名称"></el-table-column>
+            <el-table-column label="宽度(px)">
+                <el-input slot-scope="scope" v-model="scope.row.width"></el-input>
+            </el-table-column>
+            <el-table-column prop="propertyName" label="属性名称"></el-table-column>
+            <el-table-column prop="columnName" label="数据库列名"></el-table-column>
+            <el-table-column prop="columnType" label="数据库类型"></el-table-column>
+            <el-table-column label="过滤器">
+                <template slot-scope="scope">
+                    <el-select v-model="scope.row.filter" v-if="scope.row.columnType.toLowerCase() === 'date'">
+                        <el-option v-for="(item, property) in filters" :key="property" :label="item" :value="property">
+                        </el-option>
+                    </el-select>
+                    <label v-else>{{scope.row.filter}}</label>
+                </template>
+            </el-table-column>
+            <el-table-column prop="lookupCode" label="数据字典"></el-table-column>
+        </el-table>
+        <builder @click="builderCustomColumn" :json="customColumnJSON">生成自定义列JSON</builder>
+    </div>
 </script>
 
 <!-- 自定义查询template -->

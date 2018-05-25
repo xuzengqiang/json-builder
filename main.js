@@ -74,7 +74,7 @@ dom.ready(() => {
 
     new Vue({
         el: '#app',
-        data() {
+        data () {
             return {
                 name: '1212',
                 generalFieldsJSONString: JSON.stringify(DEFAULT_GENERAL_FIELDS, null, '\t'),
@@ -119,9 +119,8 @@ dom.ready(() => {
                 }
             }
         },
-        computed: {},
         methods: {
-            analyzeJSON() {
+            analyzeJSON () {
                 let generalFields
                 try {
                     generalFields = JSON.parse(this.generalFieldsJSONString)
@@ -129,6 +128,8 @@ dom.ready(() => {
                     this.$alert('对不起,JSON解析失败,请检测', '温馨提示')
                 }
 
+                this.customColumnFields = []
+                this.fields = []
                 if (Array.isArray(generalFields)) {
                     let index = 0
                     let length = generalFields.length
@@ -164,10 +165,10 @@ dom.ready(() => {
                     }
                 }
             },
-            columnSelectionChangeHandle(selection) {
+            columnSelectionChangeHandle (selection) {
                 this.selection = selection
             },
-            selectionChangeHandle(selection) {
+            selectionChangeHandle (selection) {
                 let customSearchFields = []
                 let compareMap
 
@@ -199,7 +200,7 @@ dom.ready(() => {
                 })
                 this.customSearchFields = customSearchFields
             },
-            builderCustomColumn() {
+            builderCustomColumn () {
                 let fields = []
                 let found
                 let base
@@ -225,7 +226,7 @@ dom.ready(() => {
                 })
                 this.customColumnJSON = fields
             },
-            builderCustomSearch() {
+            builderCustomSearch () {
                 let fields = []
                 let base
                 this.customSearchFields.forEach(item => {
